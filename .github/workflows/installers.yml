@@ -48,7 +48,8 @@ jobs:
         working-directory: gui/electron
         run: |
           # Version = date and time, so a newer installer updates an installed one
-          VER=$(date -u +"%y.%-m%d.%-H%M")
+          VER="$(date -u +%y).$((10#$(date -u +%m) * 100 + 10#$(date -u +%d))).$((10#$(date -u +%H) * 100 + 10#$(date -u +%M)))"
+          echo "Version $VER"
           pnpm exec electron-builder --win --config electron-builder-vitalvr.yml -c.extraMetadata.version=$VER --publish never
           ls dist/*/*-Installeur.exe
       - uses: actions/upload-artifact@v4
