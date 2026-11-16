@@ -12,6 +12,7 @@ import com.sun.jna.platform.win32.WinUser
 import dev.slimevr.FeatureFlags
 import dev.slimevr.Keybinding
 import dev.slimevr.SLIMEVR_IDENTIFIER
+import dev.slimevr.VITALVR_IDENTIFIER
 import dev.slimevr.VRServer
 import dev.slimevr.bridge.Bridge
 import dev.slimevr.config.ConfigManager
@@ -26,6 +27,7 @@ import dev.slimevr.desktop.platform.windows.WindowsNamedPipeRpcBridge
 import dev.slimevr.desktop.serial.DesktopSerialHandler
 import dev.slimevr.desktop.tracking.trackers.hid.DesktopHIDManager
 import dev.slimevr.tracking.trackers.Tracker
+import dev.slimevr.vitalalgo.ProportionLearner
 import io.eiren.util.OperatingSystem
 import io.eiren.util.OperatingSystem.Companion.currentPlatform
 import io.eiren.util.Process
@@ -47,6 +49,7 @@ import java.nio.file.Paths
 import javax.swing.JOptionPane
 import kotlin.concurrent.thread
 import kotlin.io.path.Path
+import kotlin.io.path.createDirectories
 import kotlin.io.path.exists
 import kotlin.io.path.pathString
 import kotlin.system.exitProcess
@@ -171,6 +174,8 @@ fun main(args: Array<String>) {
 			configManager = configManager,
 		)
 		vrServer.start()
+		// Vital Algo: keeps refining the body proportions during use
+		ProportionLearner(vrServer).start()
 		// Start service for USB HID trackers
 		DesktopHIDManager(
 			"Sensors HID service",
@@ -349,6 +354,18 @@ fun resolveConfig(): String {
 	if (!configFile.exists() && Path(CONFIG_FILENAME).exists()) {
 		LogManager.info("Moved local config file to appdata folder")
 		Files.move(Path(CONFIG_FILENAME), configFile)
+	}
+	// Vital Algo: first start, start from the VitalVR settings (trackers,
+	// proportions, Stay Aligned) so the learning begins from them
+	val vitalVrConfig = OperatingSystem.resolveConfigDirectory(VITALVR_IDENTIFIER)?.resolve(CONFIG_FILENAME)
+	if (!configFile.exists() && vitalVrConfig?.exists() == true) {
+		try {
+			configFile.parent?.createDirectories()
+			Files.copy(vitalVrConfig, configFile)
+			LogManager.info("[VitalAlgo] Settings copied from $vitalVrConfig")
+		} catch (e: Exception) {
+			LogManager.warning("[VitalAlgo] Could not copy the settings from $vitalVrConfig", e)
+		}
 	}
 	return configFile.pathString
 }

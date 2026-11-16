@@ -20,6 +20,7 @@ import dev.slimevr.tracking.trackers.TrackerUtils.getFirstAvailableTracker
 import dev.slimevr.tracking.trackers.TrackerUtils.getTrackerForSkeleton
 import dev.slimevr.tracking.trackers.udp.TrackerDataType
 import dev.slimevr.util.ann.VRServerThread
+import dev.slimevr.vitalalgo.RelaxedPoseLearner
 import io.eiren.util.ann.ThreadSafe
 import io.eiren.util.collections.FastList
 import io.eiren.util.logging.LogManager
@@ -219,6 +220,9 @@ class HumanSkeleton(
 
 	// Stay Aligned
 	var trackerSkeleton = TrackerSkeleton(this)
+
+	// Vital Algo: learns the player's relaxed poses for Stay Aligned
+	val relaxedPoseLearner = RelaxedPoseLearner { humanPoseManager.server?.configManager?.saveConfig() }
 	var stayAlignedConfig = StayAlignedConfig()
 
 	// Constructors
@@ -544,6 +548,7 @@ class HumanSkeleton(
 		userHeightCalibration?.tick()
 
 		StayAligned.adjustNextTracker(trackerSkeleton, stayAlignedConfig)
+		relaxedPoseLearner.update(this, stayAlignedConfig)
 
 		updateTransforms()
 		updateBones()
@@ -1576,6 +1581,7 @@ class HumanSkeleton(
 		legTweaks.resetBuffer()
 		localizer.reset()
 		ikSolver.resetOffsets()
+		relaxedPoseLearner.onReset()
 		LogManager.info("[HumanSkeleton] Reset: full ($resetSourceName)")
 	}
 
@@ -1600,6 +1606,7 @@ class HumanSkeleton(
 			}
 		}
 		legTweaks.resetBuffer()
+		relaxedPoseLearner.onReset()
 		LogManager.info("[HumanSkeleton] Reset: yaw ($resetSourceName)")
 	}
 

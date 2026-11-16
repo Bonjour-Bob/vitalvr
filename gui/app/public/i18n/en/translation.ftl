@@ -1264,7 +1264,7 @@ install-info_udev-rules_warning = Access rules via udev are required for serial 
 install-info_udev-rules_modal_button = Close
 install-info_udev-rules_modal-dont-show-again_checkbox = Don't show again
 ## Setup start
-onboarding-home = Welcome to VitalVR
+onboarding-home = Welcome to Vital Algo
 onboarding-home-start = Let's get set up!
 
 
@@ -1809,12 +1809,12 @@ tracking_checklist-settings-close = Close
 # Accessible name and tooltip for the icon-only button that collapses/expands the checklist panel
 tracking_checklist-collapse = Collapse checklist
 tracking_checklist-expand = Expand checklist
-tracking_checklist-status-incomplete = You are not prepared to use VitalVR!
+tracking_checklist-status-incomplete = You are not prepared to use Vital Algo!
 tracking_checklist-status-partial = {$count ->
     [one] You have 1 warning!
     *[many] You have {$count} warnings!
 }
-tracking_checklist-status-complete = You are prepared to use VitalVR!
+tracking_checklist-status-complete = You are prepared to use Vital Algo!
 tracking_checklist-MOUNTING_METHOD = Pick a mounting calibration method
 tracking_checklist-MOUNTING_METHOD-desc = Choose how your trackers are calibrated to the way they are mounted on your body.
 tracking_checklist-MOUNTING_METHOD-settings_desc = Shown when you have not picked a mounting calibration method.

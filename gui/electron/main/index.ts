@@ -422,7 +422,7 @@ function createWindow() {
     getPlatform() === 'macos' ? appleTrayIcon : trayIcon
   );
   const tray = new Tray(icon);
-  tray.setToolTip('VitalVR');
+  tray.setToolTip('Vital Algo');
   tray.on('click', () => {
     mainWindow?.show();
   });
@@ -487,8 +487,8 @@ const checkEnvironmentVariables = () => {
   const set = disallowedVars.filter((env) => !!process.env[env]);
   if (set.length > 0) {
     dialog.showErrorBox(
-      'VitalVR',
-      `You have environment variables ${set.join(', ')} set, which may cause the VitalVR server to fail to launch properly.`
+      'Vital Algo',
+      `You have environment variables ${set.join(', ')} set, which may cause the Vital Algo server to fail to launch properly.`
     );
     app.quit();
   }
@@ -517,8 +517,8 @@ const spawnServer = async () => {
   if (!javaBin) {
     captureJavaNotFound();
     dialog.showErrorBox(
-      'VitalVR',
-      'Unable to find a compatible Java version, Reinstall VitalVR, or install Java 17 or higher'
+      'Vital Algo',
+      'Unable to find a compatible Java version, Reinstall Vital Algo, or install Java 17 or higher'
     );
     app.quit();
     return;
@@ -608,7 +608,7 @@ app.whenReady().then(async () => {
   } catch (err) {
     logger.error(err, 'Failed to initialize stores');
     dialog.showErrorBox(
-      'VitalVR',
+      'Vital Algo',
       'Failed to initialize application storage. Please make sure the application has write permissions to its data folder.'
     );
     app.quit();
@@ -633,7 +633,7 @@ app.whenReady().then(async () => {
 
   createWindow();
 
-  logger.info('VitalVR started!');
+  logger.info('Vital Algo started!');
 
   app.on('window-all-closed', () => {
     app.quit();

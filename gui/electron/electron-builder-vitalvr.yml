@@ -1,12 +1,12 @@
-# VitalVR: Windows installer. Its own appId, folder, shortcut and settings
-# (%APPDATA%\dev.vitalvr.VitalVR): it never touches SlimeVR or BOBvr.
-# Built by Creer-Installeur-VitalVR.bat, which prepares build-vitalvr/.
-appId: dev.vitalvr.VitalVR
-productName: VitalVR
-executableName: VitalVR
+# Vital Algo: Windows installer, next to VitalVR. Its own appId, folder,
+# shortcut and settings (%APPDATA%\dev.vitalvr.VitalAlgo).
+# Built by Creer-Installeur-Vital-Algo.bat, which prepares build-vitalvr/.
+appId: dev.vitalvr.VitalAlgo
+productName: Vital Algo
+executableName: VitalAlgo
 
 directories:
-  output: dist/vitalvr
+  output: dist/vitalalgo
 
 asar: true
 asarUnpack:
@@ -43,16 +43,16 @@ win:
       to: "."
     - from: "./resources/vitalvr/steamvr-autostart.ps1"
       to: "steamvr-autostart.ps1"
-# No SteamVR driver here: VitalVR talks to the SlimeVR v21 driver already
+# No SteamVR driver here: Vital Algo talks to the SlimeVR v21 driver already
 # installed (SteamVR add-on "slimevr_09")
 
 nsis:
-  artifactName: "VitalVR-Installeur.${ext}"
+  artifactName: "VitalAlgo-Installeur.${ext}"
   oneClick: false
   perMachine: false
   allowToChangeInstallationDirectory: true
   deleteAppDataOnUninstall: false
   createDesktopShortcut: always
   createStartMenuShortcut: true
-  shortcutName: "VitalVR"
+  shortcutName: "Vital Algo"
   include: "./resources/vitalvr/installer.nsh"

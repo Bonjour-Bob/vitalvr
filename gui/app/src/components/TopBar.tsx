@@ -167,7 +167,7 @@ export function TopBar({
                   className={classNames('flex justify-around flex-col')}
                   data-electron-drag-region
                 >
-                  <Typography bold>VitalVR</Typography>
+                  <Typography bold>Vital Algo</Typography>
                 </div>
               )}
               {(!doesMatchSettings || !isMobile) && <VersionTag />}

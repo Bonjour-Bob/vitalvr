@@ -8,8 +8,8 @@ import { existsSync } from 'node:fs';
 import { options } from './cli';
 
 const javaBin = getPlatform() === 'windows' ? 'java.exe' : 'java';
-// VitalVR: its own settings and logs folder, apart from SlimeVR
-export const CONFIG_IDENTIFIER = 'dev.vitalvr.VitalVR';
+// Vital Algo: its own settings and logs folder, apart from VitalVR and SlimeVR
+export const CONFIG_IDENTIFIER = 'dev.vitalvr.VitalAlgo';
 
 export const getGuiDataFolder = () => {
   const platform = getPlatform();
