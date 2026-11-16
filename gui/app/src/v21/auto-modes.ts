@@ -182,6 +182,7 @@ export class ActivityDetector {
   private last = new Map<N.BodyPart, Quat>();
   private lastTime = 0;
   private motion = 0;
+  private tallest = 0;
   private candidate: Activity = 'normal';
   private candidateSince = 0;
   private current: Activity = 'normal';
@@ -214,8 +215,12 @@ export class ActivityDetector {
 
     const head = byPart.get(N.BodyPart.HEAD)?.headPosition;
     const hip = byPart.get(N.BodyPart.HIP)?.orientation;
-    if (!head || !hip || standingHeight <= 0) return null;
-    const height = head.y / standingHeight;
+    if (!head || !hip) return null;
+    // Height never calibrated: the highest the head has been is standing
+    this.tallest = Math.max(this.tallest, head.y);
+    const standing = standingHeight > 0 ? standingHeight : this.tallest;
+    if (standing <= 0) return null;
+    const height = head.y / standing;
     // Hips flat and head low: bending over while standing is not lying
     const lying = tiltDeg(hip) > LYING_DEG && height < LYING_HEIGHT;
 

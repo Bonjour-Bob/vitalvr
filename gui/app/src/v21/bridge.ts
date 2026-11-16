@@ -125,6 +125,7 @@ export class V21Bridge {
   private driverConnected: boolean | null = null;
   private profiles = new P.ProfileStore();
   private detector = new ActivityDetector();
+  private repairedToggles = false;
 
   constructor(
     private readonly send: (bundle: O.MessageBundleT) => void,
@@ -731,6 +732,22 @@ export class V21Bridge {
       if (!this.profiles.applied && merged.modelSettings) {
         this.profiles.markApplied();
         this.applyProfile(N.ProfileKind.SETTINGS);
+      }
+      // Toggles without a v22 switch, turned off by older VitalVR: back on
+      const t = merged.modelSettings?.toggles;
+      if (
+        t &&
+        !this.repairedToggles &&
+        Object.entries(S.HIDDEN_TOGGLES).some(
+          ([key, on]) => t[key as keyof O.ModelTogglesT] !== on
+        )
+      ) {
+        this.repairedToggles = true;
+        this.changeSettings({
+          modelSettings: make(O.ModelSettingsT, {
+            toggles: make(O.ModelTogglesT, { ...plain(t), ...S.HIDDEN_TOGGLES }),
+          }),
+        });
       }
       this.emitSettings(merged);
     },

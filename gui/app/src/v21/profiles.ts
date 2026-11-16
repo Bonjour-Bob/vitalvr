@@ -4,6 +4,7 @@
 import * as N from 'solarxr-protocol';
 import * as O from '@/v21-protocol/all_generated';
 import { make, plain } from './feed';
+import { HIDDEN_TOGGLES } from './settings';
 
 type Json = Record<string, unknown>;
 export type SettingsSnapshot = {
@@ -155,7 +156,10 @@ export function settingsRequest(
     out.driftCompensation = make(O.DriftCompensationSettingsT, snap.driftCompensation);
   if (snap.resets) out.resetsSettings = make(O.ResetsSettingsT, snap.resets);
   out.modelSettings = make(O.ModelSettingsT, {
-    toggles: snap.toggles ? make(O.ModelTogglesT, snap.toggles) : null,
+    // Also repairs profiles saved while these were wrongly off
+    toggles: snap.toggles
+      ? make(O.ModelTogglesT, { ...snap.toggles, ...HIDDEN_TOGGLES })
+      : null,
     ratios: snap.ratios ? make(O.ModelRatiosT, snap.ratios) : null,
     legTweaks: snap.legTweaks ? make(O.LegTweaksSettingsT, snap.legTweaks) : null,
   });
