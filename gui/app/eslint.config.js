@@ -83,7 +83,8 @@ export const gui = [
   eslintPluginPrettierRecommended,
   // Global ignore
   {
-    ignores: ['**/firmware-tool-api/'],
+    // VitalVR: v21-protocol is the generated v21 protocol code
+    ignores: ['**/firmware-tool-api/', '**/v21-protocol/'],
   },
 ];
 

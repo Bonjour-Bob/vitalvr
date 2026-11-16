@@ -128,7 +128,9 @@ export function snapshotSettings(s: O.SettingsResponseT): SettingsSnapshot {
   });
 }
 
-export function settingsRequest(snap: SettingsSnapshot): Partial<O.ChangeSettingsRequestT> {
+export function settingsRequest(
+  snap: SettingsSnapshot
+): Partial<O.ChangeSettingsRequestT> {
   const out: Partial<O.ChangeSettingsRequestT> = {};
   if (snap.filtering) out.filtering = make(O.FilteringSettingsT, snap.filtering);
   if (snap.driftCompensation)
@@ -142,7 +144,10 @@ export function settingsRequest(snap: SettingsSnapshot): Partial<O.ChangeSetting
   return out;
 }
 
-export function snapshotUser(parts: O.SkeletonPartT[], height: number | null): UserSnapshot {
+export function snapshotUser(
+  parts: O.SkeletonPartT[],
+  height: number | null
+): UserSnapshot {
   return { parts: parts.map((p) => [p.bone, p.value]), height };
 }
 
@@ -174,7 +179,9 @@ export class ProfileStore {
       make(N.ProfileListT, { active: kind.active, names: Object.keys(kind.list) });
     const user = this.store.user;
     // The default user profile exists even before its first save
-    const userNames = Object.keys(user.list).length ? user : { ...user, list: { [user.active]: {} } };
+    const userNames = Object.keys(user.list).length
+      ? user
+      : { ...user, list: { [user.active]: {} } };
     return make(N.ProfilesResponseT, {
       settings: list(this.store.settings),
       user: list(userNames),

@@ -16,6 +16,10 @@ private const val PREDICT_MIN = 10f
 // how many past rotations are used for prediction.
 private const val PREDICT_BUFFER = 6
 
+// VitalVR: after this long without a packet (Wi-Fi hiccup), stop predicting
+// and settle on the last real rotation instead of a guessed one
+private const val PREDICT_STALE_SECONDS = 0.1f
+
 class QuaternionMovingAverage(
 	val type: TrackerFilters,
 	var amount: Float = 0f,
@@ -30,6 +34,7 @@ class QuaternionMovingAverage(
 	private var smoothingQuaternion = IDENTITY
 	private val fpsTimer = if (VRServer.instanceInitialized) VRServer.instance.fpsTimer else NanoTimer()
 	private var timeSinceUpdate = 0f
+	private var timeSincePacket = 0f
 
 	init {
 		// amount should range from 0 to 1.
@@ -61,8 +66,10 @@ class QuaternionMovingAverage(
 		if (type == TrackerFilters.PREDICTION) {
 			val rotBuf = rotBuffer
 			if (rotBuf != null && rotBuf.isNotEmpty()) {
+				timeSincePacket += fpsTimer.timePerFrame
 				// Applies the past rotations to the current rotation
-				val predictRot = rotBuf.fold(latestQuaternion) { buf, rot -> buf * rot }
+				val stale = timeSincePacket > PREDICT_STALE_SECONDS
+				val predictRot = if (stale) latestQuaternion else rotBuf.fold(latestQuaternion) { buf, rot -> buf * rot }
 
 				// Calculate how much to slerp
 				// Limit slerp by a reasonable amount so low TPS doesn't break tracking
@@ -93,6 +100,7 @@ class QuaternionMovingAverage(
 		latestQuaternion = newQ
 
 		if (type == TrackerFilters.PREDICTION) {
+			timeSincePacket = 0f
 			if (rotBuffer!!.size == rotBuffer!!.capacity()) {
 				rotBuffer?.removeLast()
 			}

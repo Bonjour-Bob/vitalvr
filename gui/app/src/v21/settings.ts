@@ -26,10 +26,8 @@ export function skeletonToNew(s: Settings): N.SkeletonSettingsResponseT {
     }),
     ratios: make(N.SkeletonRatiosT, {
       // v21 has one filter: smoothing or prediction
-      smoothingStrength:
-        f?.type === O.FilteringType.SMOOTHING ? (f?.amount ?? 0) : 0,
-      predictionStrength:
-        f?.type === O.FilteringType.PREDICTION ? (f?.amount ?? 0) : 0,
+      smoothingStrength: f?.type === O.FilteringType.SMOOTHING ? (f?.amount ?? 0) : 0,
+      predictionStrength: f?.type === O.FilteringType.PREDICTION ? (f?.amount ?? 0) : 0,
       spineCurvature: 0,
       imputeSpineFromUpperToLower: r?.imputeWaistFromChestHip ?? 0,
       interpolateUpperLegsTwistWithLowerLegs: r?.interpKneeTrackerAnkle ?? 0,
@@ -217,10 +215,18 @@ export function timeoutToNew(s: Settings): N.TimeoutSettingsResponseT {
 
 // Which bones go to SteamVR (v21: steamVrTrackers) and to VRChat OSC (v21:
 // vrcOsc.trackers). v21 names a few groups, v22 single bones.
-type Group = { parts: N.BodyPart[]; driver?: keyof O.SteamVRTrackersSettingT; osc?: keyof O.OSCTrackersSettingT };
+type Group = {
+  parts: N.BodyPart[];
+  driver?: keyof O.SteamVRTrackersSettingT;
+  osc?: keyof O.OSCTrackersSettingT;
+};
 const ROUTING_GROUPS: Group[] = [
   { parts: [N.BodyPart.HEAD], osc: 'head' },
-  { parts: [N.BodyPart.UPPER_CHEST, N.BodyPart.LOWER_CHEST], driver: 'chest', osc: 'chest' },
+  {
+    parts: [N.BodyPart.UPPER_CHEST, N.BodyPart.LOWER_CHEST],
+    driver: 'chest',
+    osc: 'chest',
+  },
   { parts: [N.BodyPart.HIP], driver: 'waist', osc: 'waist' },
   { parts: [N.BodyPart.LEFT_LOWER_LEG], driver: 'leftKnee', osc: 'knees' },
   { parts: [N.BodyPart.RIGHT_LOWER_LEG], driver: 'rightKnee', osc: 'knees' },
@@ -257,7 +263,11 @@ export function routingToNew(s: Settings): N.BoneRoutingSettingsResponseT {
     automatic: driver?.automaticTrackerToggle ?? true,
     routes,
     outputs: [
-      status(N.RoutingOutput.DRIVER, ROUTING_GROUPS.filter((g) => g.driver), true),
+      status(
+        N.RoutingOutput.DRIVER,
+        ROUTING_GROUPS.filter((g) => g.driver),
+        true
+      ),
       status(
         N.RoutingOutput.VRC_OSC,
         ROUTING_GROUPS.filter((g) => g.osc),
@@ -303,9 +313,15 @@ export function skeletonToOld(
       // Prediction wins when both are set: it is the one with less delay
       out.filtering =
         prediction > 0
-          ? make(O.FilteringSettingsT, { type: O.FilteringType.PREDICTION, amount: prediction })
+          ? make(O.FilteringSettingsT, {
+              type: O.FilteringType.PREDICTION,
+              amount: prediction,
+            })
           : smoothing > 0
-            ? make(O.FilteringSettingsT, { type: O.FilteringType.SMOOTHING, amount: smoothing })
+            ? make(O.FilteringSettingsT, {
+                type: O.FilteringType.SMOOTHING,
+                amount: smoothing,
+              })
             : make(O.FilteringSettingsT, {
                 type: O.FilteringType.NONE,
                 amount: s.filtering?.amount ?? 0,
@@ -316,7 +332,9 @@ export function skeletonToOld(
   return out;
 }
 
-export function userHeightToOld(req: N.ChangeUserHeightRequestT): Partial<O.ChangeSettingsRequestT> {
+export function userHeightToOld(
+  req: N.ChangeUserHeightRequestT
+): Partial<O.ChangeSettingsRequestT> {
   return {
     modelSettings: make(O.ModelSettingsT, {
       skeletonHeight: make(O.SkeletonHeightT, {
@@ -327,13 +345,19 @@ export function userHeightToOld(req: N.ChangeUserHeightRequestT): Partial<O.Chan
   };
 }
 
-export function driverToOld(req: N.ChangeDriverSettingsRequestT): Partial<O.ChangeSettingsRequestT> {
+export function driverToOld(
+  req: N.ChangeDriverSettingsRequestT
+): Partial<O.ChangeSettingsRequestT> {
   return {
-    velocitySettings: make(O.VelocitySettingsT, { sendDerivedVelocity: req.sendVelocity }),
+    velocitySettings: make(O.VelocitySettingsT, {
+      sendDerivedVelocity: req.sendVelocity,
+    }),
   };
 }
 
-export function resetsToOld(req: N.ChangeResetsSettingsRequestT): Partial<O.ChangeSettingsRequestT> {
+export function resetsToOld(
+  req: N.ChangeResetsSettingsRequestT
+): Partial<O.ChangeSettingsRequestT> {
   return {
     resetsSettings: make(O.ResetsSettingsT, {
       resetMountingFeet: req.resetMountingFeet,
@@ -381,8 +405,10 @@ export function stayAlignedToOld(
   const a = make(O.StayAlignedSettingsT, { ...(s.stayAligned ?? {}) });
   a.enabled = req.enabled;
   for (const toggle of req.poseToggles) {
-    if (toggle.pose === N.StayAlignedRelaxedPose.STANDING) a.standingEnabled = toggle.enabled;
-    if (toggle.pose === N.StayAlignedRelaxedPose.SITTING) a.sittingEnabled = toggle.enabled;
+    if (toggle.pose === N.StayAlignedRelaxedPose.STANDING)
+      a.standingEnabled = toggle.enabled;
+    if (toggle.pose === N.StayAlignedRelaxedPose.SITTING)
+      a.sittingEnabled = toggle.enabled;
     if (toggle.pose === N.StayAlignedRelaxedPose.FLAT) a.flatEnabled = toggle.enabled;
   }
   return { stayAligned: a };
@@ -390,7 +416,12 @@ export function stayAlignedToOld(
 
 function oscSettings(
   current: O.OSCSettingsT | null | undefined,
-  req: { enabled: boolean; portIn: number; portOut: number; address: string | Uint8Array | null }
+  req: {
+    enabled: boolean;
+    portIn: number;
+    portOut: number;
+    address: string | Uint8Array | null;
+  }
 ) {
   return make(O.OSCSettingsT, {
     enabled: req.enabled,
@@ -426,15 +457,23 @@ export function vmcToOld(
   };
 }
 
-export function vrmToOld(req: N.ChangeVRMSettingsRequestT): Partial<O.ChangeSettingsRequestT> {
+export function vrmToOld(
+  req: N.ChangeVRMSettingsRequestT
+): Partial<O.ChangeSettingsRequestT> {
   return { vrm: make(O.VRMSettingsT, { vrmJson: req.vrmJson }) };
 }
 
-export function hidToOld(req: N.ChangeHIDSettingsRequestT): Partial<O.ChangeSettingsRequestT> {
-  return { hidSettings: make(O.HIDSettingsT, { trackersOverHid: req.trackersOverHid }) };
+export function hidToOld(
+  req: N.ChangeHIDSettingsRequestT
+): Partial<O.ChangeSettingsRequestT> {
+  return {
+    hidSettings: make(O.HIDSettingsT, { trackersOverHid: req.trackersOverHid }),
+  };
 }
 
-export function timeoutToOld(req: N.ChangeTimeoutSettingsRequestT): Partial<O.ChangeSettingsRequestT> {
+export function timeoutToOld(
+  req: N.ChangeTimeoutSettingsRequestT
+): Partial<O.ChangeSettingsRequestT> {
   return { timeout: make(O.TimeoutSettingsT, { duration: req.delay }) };
 }
 
@@ -449,7 +488,9 @@ export function routingToOld(
     req.routes.some((r) => r.bone === bone && r.outputs.includes(output));
   for (const group of ROUTING_GROUPS) {
     if (group.driver)
-      (driver[group.driver] as boolean) = group.parts.some((p) => routed(p, N.RoutingOutput.DRIVER));
+      (driver[group.driver] as boolean) = group.parts.some((p) =>
+        routed(p, N.RoutingOutput.DRIVER)
+      );
     if (group.osc) {
       // knees, feet, elbows and hands are one switch for both sides in v21
       const sameSwitch = ROUTING_GROUPS.filter((g) => g.osc === group.osc);

@@ -178,7 +178,10 @@ export class V21Bridge {
     if ((SAME_LAYOUT as readonly string[]).includes(name)) {
       const oldType = O.RpcMessage[name as keyof typeof O.RpcMessage];
       const Target = (O as unknown as Record<string, Table<unknown>>)[name];
-      this.rpc(oldType, transcode(data as Packable, Target) as O.RpcMessageHeaderT['message']);
+      this.rpc(
+        oldType,
+        transcode(data as Packable, Target) as O.RpcMessageHeaderT['message']
+      );
       return;
     }
     const handler = this.requests[name];
@@ -205,7 +208,9 @@ export class V21Bridge {
     UserHeightRequest: () => this.settingsRequest(),
     BoneRoutingSettingsRequest: () => this.settingsRequest(),
     ChangeSkeletonSettingsRequest: (r: N.ChangeSkeletonSettingsRequestT) =>
-      this.changeSettings(S.skeletonToOld(r, this.settings ?? new O.SettingsResponseT())),
+      this.changeSettings(
+        S.skeletonToOld(r, this.settings ?? new O.SettingsResponseT())
+      ),
     ChangeUserHeightRequest: (r: N.ChangeUserHeightRequestT) =>
       this.changeSettings(S.userHeightToOld(r)),
     ChangeDriverSettingsRequest: (r: N.ChangeDriverSettingsRequestT) =>
@@ -219,7 +224,9 @@ export class V21Bridge {
     TapDetectionSetupModeRequest: (r: N.TapDetectionSetupModeRequestT) =>
       this.changeSettings(S.tapToOld(r)),
     ChangeStayAlignedSettingsRequest: (r: N.ChangeStayAlignedSettingsRequestT) =>
-      this.changeSettings(S.stayAlignedToOld(r, this.settings ?? new O.SettingsResponseT())),
+      this.changeSettings(
+        S.stayAlignedToOld(r, this.settings ?? new O.SettingsResponseT())
+      ),
     ChangeVRCOSCSettingsRequest: (r: N.ChangeVRCOSCSettingsRequestT) =>
       this.changeSettings(S.vrcOscToOld(r, this.settings ?? new O.SettingsResponseT())),
     ChangeVMCOSCSettingsRequest: (r: N.ChangeVMCOSCSettingsRequestT) =>
@@ -231,7 +238,9 @@ export class V21Bridge {
     ChangeTimeoutSettingsRequest: (r: N.ChangeTimeoutSettingsRequestT) =>
       this.changeSettings(S.timeoutToOld(r)),
     ChangeBoneRoutingSettingsRequest: (r: N.ChangeBoneRoutingSettingsRequestT) =>
-      this.changeSettings(S.routingToOld(r, this.settings ?? new O.SettingsResponseT())),
+      this.changeSettings(
+        S.routingToOld(r, this.settings ?? new O.SettingsResponseT())
+      ),
 
     // Resets
     ResetRequest: (r: N.ResetRequestT) =>
@@ -279,7 +288,9 @@ export class V21Bridge {
     MagToggleRequest: (r: N.MagToggleRequestT) =>
       this.rpc(
         O.RpcMessage.MagToggleRequest,
-        make(O.MagToggleRequestT, { trackerId: r.trackerId ? trackerIdToOld(r.trackerId) : null })
+        make(O.MagToggleRequestT, {
+          trackerId: r.trackerId ? trackerIdToOld(r.trackerId) : null,
+        })
       ),
     ChangeMagToggleRequest: (r: N.ChangeMagToggleRequestT) =>
       this.rpc(
@@ -300,7 +311,10 @@ export class V21Bridge {
     ChangeSkeletonProportionsRequest: (r: N.ChangeSkeletonProportionsRequestT) => {
       let bone: O.SkeletonBone | undefined;
       let value = r.value;
-      if (r.bone === N.SkeletonBone.UPPER_WAIST || r.bone === N.SkeletonBone.LOWER_WAIST) {
+      if (
+        r.bone === N.SkeletonBone.UPPER_WAIST ||
+        r.bone === N.SkeletonBone.LOWER_WAIST
+      ) {
         // Both halves make the v21 waist
         const waist = this.skeletonParts.find((p) => p.bone === O.SkeletonBone.WAIST);
         bone = O.SkeletonBone.WAIST;
@@ -324,7 +338,8 @@ export class V21Bridge {
       ),
 
     // Keybinds: v22 added NONE in front of the ids
-    KeybindRequest: () => this.rpc(O.RpcMessage.KeybindRequest, new O.KeybindRequestT()),
+    KeybindRequest: () =>
+      this.rpc(O.RpcMessage.KeybindRequest, new O.KeybindRequestT()),
     ChangeKeybindRequest: (r: N.ChangeKeybindRequestT) =>
       this.rpc(
         O.RpcMessage.ChangeKeybindRequest,
@@ -406,7 +421,9 @@ export class V21Bridge {
         make(N.FirmwareUpdatesResponseT, { devices: [] })
       ),
     // v21 records a relaxed pose at once: count down here first, like v22
-    StartStayAlignedPoseRecordingRequest: (r: N.StartStayAlignedPoseRecordingRequestT) => {
+    StartStayAlignedPoseRecordingRequest: (
+      r: N.StartStayAlignedPoseRecordingRequestT
+    ) => {
       const pose = stayAlignedPoseToOld(r.pose);
       if (pose === null) return;
       this.stopPoseRecording();
@@ -454,7 +471,8 @@ export class V21Bridge {
     },
 
     // Profiles (kept by the interface, see profiles.ts)
-    ProfilesRequest: () => this.reply(N.RpcMessage.ProfilesResponse, this.profiles.response()),
+    ProfilesRequest: () =>
+      this.reply(N.RpcMessage.ProfilesResponse, this.profiles.response()),
     SwitchProfileRequest: (r: N.SwitchProfileRequestT) => {
       const name = r.name?.toString() ?? '';
       this.rememberProfile(r.kind);
@@ -465,7 +483,8 @@ export class V21Bridge {
     CreateProfileRequest: (r: N.CreateProfileRequestT) => {
       const from = r.copyFrom?.toString() ?? '';
       let copy: P.SettingsSnapshot | P.UserSnapshot | null;
-      if (from && from === this.profiles.activeName(r.kind)) copy = this.currentSnapshot(r.kind);
+      if (from && from === this.profiles.activeName(r.kind))
+        copy = this.currentSnapshot(r.kind);
       else if (from) copy = this.profiles.get(r.kind, from);
       else
         copy =
@@ -480,7 +499,11 @@ export class V21Bridge {
     },
     RenameProfileRequest: (r: N.RenameProfileRequestT) =>
       this.profileDone(
-        this.profiles.rename(r.kind, r.name?.toString() ?? '', r.newName?.toString() ?? '')
+        this.profiles.rename(
+          r.kind,
+          r.name?.toString() ?? '',
+          r.newName?.toString() ?? ''
+        )
       ),
     DeleteProfileRequest: (r: N.DeleteProfileRequestT) =>
       this.profileDone(this.profiles.remove(r.kind, r.name?.toString() ?? '')),
@@ -498,7 +521,9 @@ export class V21Bridge {
         });
       } else if (method instanceof N.SerialFirmwareUpdateT) {
         oldMethod = make(O.SerialFirmwareUpdateT, {
-          deviceId: method.deviceId ? make(O.SerialDevicePortT, plain(method.deviceId)) : null,
+          deviceId: method.deviceId
+            ? make(O.SerialDevicePortT, plain(method.deviceId))
+            : null,
           needManualReboot: method.needManualReboot,
           ssid: method.ssid,
           password: method.password,
@@ -571,7 +596,9 @@ export class V21Bridge {
     for (const [type, data] of out) this.reply(type, data);
   }
 
-  private currentSnapshot(kind: N.ProfileKind): P.SettingsSnapshot | P.UserSnapshot | null {
+  private currentSnapshot(
+    kind: N.ProfileKind
+  ): P.SettingsSnapshot | P.UserSnapshot | null {
     if (kind === N.ProfileKind.SETTINGS)
       return this.settings ? P.snapshotSettings(this.settings) : null;
     if (kind === N.ProfileKind.USER && this.skeletonParts.length)
@@ -677,7 +704,10 @@ export class V21Bridge {
               : N.ResetLifecycle.RUNNING,
           bodyParts: r.bodyParts.map(bodyPartToNew),
           detailType: N.ResetDetail.CountdownDetail,
-          detail: make(N.CountdownDetailT, { progress: r.progress, duration: r.duration }),
+          detail: make(N.CountdownDetailT, {
+            progress: r.progress,
+            duration: r.duration,
+          }),
         })
       ),
     SkeletonConfigResponse: (r: O.SkeletonConfigResponseT) => {
@@ -728,7 +758,9 @@ export class V21Bridge {
       this.emit(
         'rpc',
         N.RpcMessage.TapDetectionSetupNotification,
-        make(N.TapDetectionSetupNotificationT, { trackerId: trackerIdToNew(r.trackerId) })
+        make(N.TapDetectionSetupNotificationT, {
+          trackerId: trackerIdToNew(r.trackerId),
+        })
       ),
     KeybindResponse: (r: O.KeybindResponseT) => {
       const keybind = (k: O.KeybindT) =>
@@ -767,7 +799,13 @@ export class V21Bridge {
           trackers:
             status === undefined
               ? []
-              : [make(N.TrackerProvisioningStateT, { port: null, macAddress: null, status })],
+              : [
+                  make(N.TrackerProvisioningStateT, {
+                    port: null,
+                    macAddress: null,
+                    status,
+                  }),
+                ],
         })
       );
     },
@@ -811,7 +849,10 @@ function settingsDefaults(): N.SettingsDefaultsResponseT {
       rightFoot: true,
       automaticTrackerToggle: true,
     }),
-    filtering: make(O.FilteringSettingsT, { type: O.FilteringType.PREDICTION, amount: 0.2 }),
+    filtering: make(O.FilteringSettingsT, {
+      type: O.FilteringType.PREDICTION,
+      amount: 0.2,
+    }),
     modelSettings: make(O.ModelSettingsT, {
       toggles: make(O.ModelTogglesT, {
         floorClip: true,
@@ -892,21 +933,32 @@ function noErrorReporting() {
   });
 }
 
-const WIFI_STATUS: Partial<Record<O.WifiProvisioningStatus, N.TrackerProvisioningStatus>> = {
+const WIFI_STATUS: Partial<
+  Record<O.WifiProvisioningStatus, N.TrackerProvisioningStatus>
+> = {
   [O.WifiProvisioningStatus.SERIAL_INIT]: N.TrackerProvisioningStatus.SERIAL_INIT,
-  [O.WifiProvisioningStatus.OBTAINING_MAC_ADDRESS]: N.TrackerProvisioningStatus.OBTAINING_MAC_ADDRESS,
+  [O.WifiProvisioningStatus.OBTAINING_MAC_ADDRESS]:
+    N.TrackerProvisioningStatus.OBTAINING_MAC_ADDRESS,
   [O.WifiProvisioningStatus.PROVISIONING]: N.TrackerProvisioningStatus.PROVISIONING,
   [O.WifiProvisioningStatus.CONNECTING]: N.TrackerProvisioningStatus.CONNECTING,
-  [O.WifiProvisioningStatus.CONNECTION_ERROR]: N.TrackerProvisioningStatus.CONNECTION_ERROR,
-  [O.WifiProvisioningStatus.LOOKING_FOR_SERVER]: N.TrackerProvisioningStatus.LOOKING_FOR_SERVER,
-  [O.WifiProvisioningStatus.COULD_NOT_FIND_SERVER]: N.TrackerProvisioningStatus.COULD_NOT_FIND_SERVER,
+  [O.WifiProvisioningStatus.CONNECTION_ERROR]:
+    N.TrackerProvisioningStatus.CONNECTION_ERROR,
+  [O.WifiProvisioningStatus.LOOKING_FOR_SERVER]:
+    N.TrackerProvisioningStatus.LOOKING_FOR_SERVER,
+  [O.WifiProvisioningStatus.COULD_NOT_FIND_SERVER]:
+    N.TrackerProvisioningStatus.COULD_NOT_FIND_SERVER,
   [O.WifiProvisioningStatus.DONE]: N.TrackerProvisioningStatus.DONE,
-  [O.WifiProvisioningStatus.NO_SERIAL_LOGS_ERROR]: N.TrackerProvisioningStatus.NO_SERIAL_LOGS_ERROR,
+  [O.WifiProvisioningStatus.NO_SERIAL_LOGS_ERROR]:
+    N.TrackerProvisioningStatus.NO_SERIAL_LOGS_ERROR,
 };
 
-function stayAlignedPoseToOld(pose: N.StayAlignedRelaxedPose): O.StayAlignedRelaxedPose | null {
-  if (pose === N.StayAlignedRelaxedPose.STANDING) return O.StayAlignedRelaxedPose.STANDING;
-  if (pose === N.StayAlignedRelaxedPose.SITTING) return O.StayAlignedRelaxedPose.SITTING;
+function stayAlignedPoseToOld(
+  pose: N.StayAlignedRelaxedPose
+): O.StayAlignedRelaxedPose | null {
+  if (pose === N.StayAlignedRelaxedPose.STANDING)
+    return O.StayAlignedRelaxedPose.STANDING;
+  if (pose === N.StayAlignedRelaxedPose.SITTING)
+    return O.StayAlignedRelaxedPose.SITTING;
   if (pose === N.StayAlignedRelaxedPose.FLAT) return O.StayAlignedRelaxedPose.FLAT;
   return null;
 }
