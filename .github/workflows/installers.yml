@@ -1,0 +1,59 @@
+# Builds the Windows installer of this branch (main: VitalVR, vital-algo:
+# Vital Algo). Started by hand (workflow_dispatch), the installer is in the
+# run's artifacts.
+name: Installers
+
+on:
+  workflow_dispatch:
+
+jobs:
+  windows:
+    name: Windows installer
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: bash
+    env:
+      HUSKY: '0'
+    steps:
+      - uses: actions/checkout@v6
+      # Both protocols, not the huge openvr submodule
+      - run: git submodule update --init solarxr-protocol gui/solarxr-protocol
+      - uses: actions/setup-java@v5
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+      - uses: gradle/actions/setup-gradle@v6
+      - name: Server
+        run: ./gradlew :server:desktop:shadowJar --console=plain
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: '.node-version'
+          cache: 'pnpm'
+      - name: Interface
+        run: |
+          pnpm i
+          pnpm run build
+      - name: Java bundled in the installer
+        run: |
+          jlink --add-modules ALL-MODULE-PATH --strip-debug --no-header-files --no-man-pages --output gui/electron/build-vitalvr/jre
+          test -f gui/electron/build-vitalvr/jre/bin/java.exe
+      - name: SteamVR bindings of SlimeVR v21.1.0
+        run: |
+          curl -L -f -o bindings.zip https://github.com/SlimeVR/SlimeVR-Server/releases/download/v21.1.0/SlimeVR-win64.zip
+          mkdir -p gui/electron/build-vitalvr/bindings
+          unzip -j -o bindings.zip SlimeVR-Bindings-Provider.exe openvr_api.dll -d gui/electron/build-vitalvr/bindings
+      - name: Installer
+        working-directory: gui/electron
+        run: |
+          # Version = date and time, so a newer installer updates an installed one
+          VER=$(date -u +"%y.%-m%d.%-H%M")
+          pnpm exec electron-builder --win --config electron-builder-vitalvr.yml -c.extraMetadata.version=$VER --publish never
+          ls dist/*/*-Installeur.exe
+      - uses: actions/upload-artifact@v4
+        with:
+          name: installer
+          path: gui/electron/dist/*/*-Installeur.exe
+          if-no-files-found: error
+          retention-days: 14
