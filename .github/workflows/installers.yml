@@ -1,10 +1,13 @@
 # Builds the Windows installer of this branch (main: VitalVR, vital-algo:
-# Vital Algo). Started by hand (workflow_dispatch), the installer is in the
-# run's artifacts.
+# Vital Algo). Started by hand (workflow_dispatch). The installer goes to a
+# draft release "installer-<branch>" (drafts are only visible to the owner).
 name: Installers
 
 on:
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   windows:
@@ -58,3 +61,10 @@ jobs:
           path: gui/electron/dist/*/*-Installeur.exe
           if-no-files-found: error
           retention-days: 14
+      - name: Draft release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="installer-${GITHUB_REF_NAME}"
+          gh release delete "$TAG" --yes --cleanup-tag || true
+          gh release create "$TAG" --draft --target "$GITHUB_SHA" --title "Installeur ${GITHUB_REF_NAME}" --notes "Installeur Windows (branche ${GITHUB_REF_NAME})" gui/electron/dist/*/*-Installeur.exe
