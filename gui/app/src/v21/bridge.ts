@@ -10,6 +10,7 @@ import * as O from '@/v21-protocol/all_generated';
 import { bodyPartToNew, bodyPartToOld, trackerIdToNew, trackerIdToOld } from './ids';
 import { feedConfigToOld, feedUpdateToNew, make, plain } from './feed';
 import * as S from './settings';
+import * as P from './profiles';
 
 type Packable = { pack(builder: Builder): number };
 type Table<T> = new () => { __init(i: number, bb: ByteBuffer): { unpack(): T } };
@@ -117,6 +118,7 @@ export class V21Bridge {
   private unknownDevices = new Map<string, N.UnknownDeviceT>();
   private poseRecording: ReturnType<typeof setInterval> | null = null;
   private driverConnected: boolean | null = null;
+  private profiles = new P.ProfileStore();
 
   constructor(
     private readonly send: (bundle: O.MessageBundleT) => void,
@@ -451,6 +453,38 @@ export class V21Bridge {
       );
     },
 
+    // Profiles (kept by the interface, see profiles.ts)
+    ProfilesRequest: () => this.reply(N.RpcMessage.ProfilesResponse, this.profiles.response()),
+    SwitchProfileRequest: (r: N.SwitchProfileRequestT) => {
+      const name = r.name?.toString() ?? '';
+      this.rememberProfile(r.kind);
+      const status = this.profiles.switchTo(r.kind, name);
+      if (status === N.ProfileOperationStatus.OK) this.applyProfile(r.kind);
+      this.profileDone(status);
+    },
+    CreateProfileRequest: (r: N.CreateProfileRequestT) => {
+      const from = r.copyFrom?.toString() ?? '';
+      let copy: P.SettingsSnapshot | P.UserSnapshot | null;
+      if (from && from === this.profiles.activeName(r.kind)) copy = this.currentSnapshot(r.kind);
+      else if (from) copy = this.profiles.get(r.kind, from);
+      else
+        copy =
+          r.kind === N.ProfileKind.USER
+            ? { parts: [], height: null }
+            : P.PRESETS['Origine SlimeVR'];
+      this.profileDone(
+        copy
+          ? this.profiles.create(r.kind, r.name?.toString() ?? '', copy)
+          : N.ProfileOperationStatus.NOT_FOUND
+      );
+    },
+    RenameProfileRequest: (r: N.RenameProfileRequestT) =>
+      this.profileDone(
+        this.profiles.rename(r.kind, r.name?.toString() ?? '', r.newName?.toString() ?? '')
+      ),
+    DeleteProfileRequest: (r: N.DeleteProfileRequestT) =>
+      this.profileDone(this.profiles.remove(r.kind, r.name?.toString() ?? '')),
+
     // Firmware updates over Wi-Fi or USB
     FirmwareUpdateRequest: (r: N.FirmwareUpdateRequestT) => {
       const method = r.method;
@@ -537,6 +571,57 @@ export class V21Bridge {
     for (const [type, data] of out) this.reply(type, data);
   }
 
+  private currentSnapshot(kind: N.ProfileKind): P.SettingsSnapshot | P.UserSnapshot | null {
+    if (kind === N.ProfileKind.SETTINGS)
+      return this.settings ? P.snapshotSettings(this.settings) : null;
+    if (kind === N.ProfileKind.USER && this.skeletonParts.length)
+      return P.snapshotUser(
+        this.skeletonParts,
+        this.settings?.modelSettings?.skeletonHeight?.hmdHeight ?? null
+      );
+    return null;
+  }
+
+  private rememberProfile(kind: N.ProfileKind) {
+    const snapshot = this.currentSnapshot(kind);
+    if (snapshot) this.profiles.remember(kind, snapshot);
+  }
+
+  private applyProfile(kind: N.ProfileKind) {
+    const snapshot = this.profiles.get(kind, this.profiles.activeName(kind));
+    if (!snapshot) return;
+    if (kind === N.ProfileKind.SETTINGS) {
+      this.changeSettings(P.settingsRequest(snapshot as P.SettingsSnapshot));
+      return;
+    }
+    const user = snapshot as P.UserSnapshot;
+    if (!user.parts.length)
+      this.rpc(O.RpcMessage.SkeletonResetAllRequest, new O.SkeletonResetAllRequestT());
+    for (const [bone, value] of user.parts)
+      this.rpc(
+        O.RpcMessage.ChangeSkeletonConfigRequest,
+        make(O.ChangeSkeletonConfigRequestT, { bone, value })
+      );
+    if (user.height !== null)
+      this.changeSettings({
+        modelSettings: make(O.ModelSettingsT, {
+          skeletonHeight: make(O.SkeletonHeightT, {
+            hmdHeight: user.height,
+            floorHeight: this.settings?.modelSettings?.skeletonHeight?.floorHeight ?? 0,
+          }),
+        }),
+      });
+    this.rpc(O.RpcMessage.SkeletonConfigRequest, new O.SkeletonConfigRequestT());
+  }
+
+  private profileDone(status: N.ProfileOperationStatus) {
+    this.reply(
+      N.RpcMessage.ProfileOperationResponse,
+      make(N.ProfileOperationResponseT, { status })
+    );
+    this.reply(N.RpcMessage.ProfilesResponse, this.profiles.response());
+  }
+
   // v21 does not report the driver: an HMD seen by the server comes from it
   private isDriverConnected() {
     return (
@@ -572,6 +657,12 @@ export class V21Bridge {
         if (value !== null) (merged as unknown as Record<string, unknown>)[key] = value;
       }
       this.settings = merged;
+      // First start: the server has the SlimeVR defaults, use the VitalVR
+      // starting profile instead
+      if (!this.profiles.applied && merged.modelSettings) {
+        this.profiles.markApplied();
+        this.applyProfile(N.ProfileKind.SETTINGS);
+      }
       this.emitSettings(merged);
     },
     ResetResponse: (r: O.ResetResponseT) =>
