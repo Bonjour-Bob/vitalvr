@@ -8,6 +8,16 @@ import { make } from './feed';
 
 type Settings = O.SettingsResponseT;
 
+// The v21 server sets every toggle from each request, a missing one reads as
+// off. v22 has no switch for these: always send them on (v21 defaults).
+export const HIDDEN_TOGGLES: Partial<O.ModelTogglesT> = {
+  extendedSpine: true,
+  extendedPelvis: true,
+  extendedKnee: true,
+  forceArmsFromHmd: true,
+  correctConstraints: true,
+};
+
 // --- v21 -> v22 -------------------------------------------------------------
 
 export function skeletonToNew(s: Settings): N.SkeletonSettingsResponseT {
@@ -289,6 +299,7 @@ export function skeletonToOld(
   const model = make(O.ModelSettingsT, {});
   if (t) {
     model.toggles = make(O.ModelTogglesT, {
+      ...HIDDEN_TOGGLES,
       floorClip: t.floorClip,
       skatingCorrection: t.skatingCorrection,
       toeSnap: t.toeSnap,
