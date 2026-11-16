@@ -3,7 +3,10 @@ import { Clickable } from '@/components/commons/Clickable';
 
 import { useMemo, useEffect, useState, useRef, useLayoutEffect } from 'react';
 import { BasedSkeletonHelper } from '@/utils/skeletonHelper';
-import { BasedSkeletonMeshHelper } from '@/utils/skeletonMeshHelper';
+import {
+  avatarColor,
+  BasedSkeletonMeshHelper,
+} from '@/utils/skeletonMeshHelper';
 import {
   computeHeadYOffset,
   deriveSkeletonProportions,
@@ -33,7 +36,7 @@ import * as Sentry from '@sentry/react';
 import { Typography } from '@/components/commons/Typography';
 import { useAtomValue } from 'jotai';
 import { bonesAtom } from '@/store/app-store';
-import { Config, useConfig } from '@/hooks/config';
+import { Config, defaultConfig, useConfig } from '@/hooks/config';
 import { Tween } from '@tweenjs/tween.js';
 import { EyeIcon } from '@/components/commons/icon/EyeIcon';
 
@@ -495,6 +498,10 @@ function SkeletonVisualizer({
   onFollowLockChange?: (locked: boolean) => void;
 }) {
   const { config } = useConfig();
+  // VitalVR: avatar colour from Settings > Appearance
+  useEffect(() => {
+    avatarColor.set(config?.avatarColor ?? defaultConfig.avatarColor);
+  }, [config?.avatarColor]);
   const style = config?.skeletonPreviewStyle ?? 'mesh';
 
   const previewContext = useRef<PreviewContext | null>(null);

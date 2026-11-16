@@ -21,6 +21,8 @@ type Store = {
   version: 1;
   // The starting profile was applied to the server
   applied: boolean;
+  // Built-in profiles already offered (a deleted one does not come back)
+  presets?: string[];
   settings: Kind<SettingsSnapshot>;
   user: Kind<UserSnapshot>;
 };
@@ -80,6 +82,22 @@ export const PRESETS: Record<string, SettingsSnapshot> = {
       enforceConstraints: false,
     },
     legTweaks: { correctionStrength: 0.3 },
+  },
+  // Lying in bed, chilling: calm and smooth, no floor or foot locking (the
+  // bed is not the floor)
+  'Lit chill': {
+    filtering: { type: O.FilteringType.SMOOTHING, amount: 0.5 },
+    toggles: {
+      extendedSpine: true,
+      extendedPelvis: true,
+      extendedKnee: true,
+      floorClip: false,
+      skatingCorrection: false,
+      footPlant: false,
+      toeSnap: false,
+      usePosition: true,
+      enforceConstraints: true,
+    },
   },
   // SlimeVR v21 as it comes
   'Origine SlimeVR': {
@@ -162,7 +180,14 @@ export class ProfileStore {
       settings: { active: NORMAL, list: { ...PRESETS } },
       user: { active: USER_DEFAULT, list: {} },
     };
-    if (!stored) save(this.store);
+    // Built-in profiles added by a newer VitalVR
+    const offered = this.store.presets ?? Object.keys(this.store.settings.list);
+    for (const [name, preset] of Object.entries(PRESETS)) {
+      if (!offered.includes(name) && !(name in this.store.settings.list))
+        this.store.settings.list[name] = preset;
+    }
+    this.store.presets = Object.keys(PRESETS);
+    save(this.store);
   }
 
   get applied() {

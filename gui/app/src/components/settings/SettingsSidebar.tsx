@@ -49,6 +49,10 @@ export function SettingsSidebar() {
             to="/settings/profiles"
             id="settings-sidebar-profiles"
           />
+          <SettingsLink
+            to="/settings/auto-modes"
+            id="settings-sidebar-auto_modes"
+          />
         </div>
       </div>
       <div className="flex flex-col gap-2">

@@ -45,6 +45,9 @@ function loadModel(url: string): Promise<Object3D | null> {
   return p;
 }
 
+// VitalVR: colour of the avatar, changed in Settings > Appearance
+export const avatarColor = new Color(0.89, 0.89, 0.94);
+
 interface AttachedShape {
   config: BoneShapeConfig;
   /** On the bone: its orientation, and the shape's offset and size along its axes. */
@@ -136,7 +139,8 @@ export class BasedSkeletonMeshHelper extends Object3D {
               mat.emissiveMap = mat.map;
               mat.emissiveIntensity = 0.2;
               mat.emissive = new Color(1, 1, 1);
-              mat.color = new Color(0.89, 0.89, 0.94);
+              // VitalVR: one shared colour, set from the appearance settings
+              mat.color = avatarColor;
             }
           }
 

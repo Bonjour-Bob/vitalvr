@@ -1,6 +1,6 @@
 import { useLocalization } from '@fluent/react';
 import { useEffect } from 'react';
-import { useForm } from 'react-hook-form';
+import { Control, Controller, useForm } from 'react-hook-form';
 import { Typography } from '@/components/commons/Typography';
 import { SettingsPagePaneLayout } from '@/components/settings/SettingsPagePaneLayout';
 import { SettingRow, SettingsGroup } from '@/components/settings/SettingRow';
@@ -20,6 +20,9 @@ interface AppearanceSettingsForm {
   theme: string;
   textSize: number;
   fonts: string;
+  customAccent: string;
+  customBackground: string;
+  avatarColor: string;
 }
 
 export const appearanceSettingsPage = defineSettingsPage({
@@ -31,6 +34,15 @@ export const appearanceSettingsPage = defineSettingsPage({
         theme: {
           title: 'settings-general-interface-theme',
           description: 'settings-general-interface-theme-description',
+        },
+        customColors: {
+          title: 'settings-interface-appearance-custom_colors',
+          description:
+            'settings-interface-appearance-custom_colors-description',
+        },
+        avatarColor: {
+          title: 'settings-interface-appearance-avatar_color',
+          description: 'settings-interface-appearance-avatar_color-description',
         },
       },
     },
@@ -67,6 +79,31 @@ export const appearanceSettingsPage = defineSettingsPage({
 
 const { groups } = appearanceSettingsPage;
 
+// VitalVR: a colour picker bound to the form
+function ColorInput({
+  control,
+  name,
+}: {
+  control: Control<AppearanceSettingsForm>;
+  name: 'customAccent' | 'customBackground' | 'avatarColor';
+}) {
+  return (
+    <Controller
+      control={control}
+      name={name}
+      render={({ field: { value, onChange } }) => (
+        <input
+          type="color"
+          aria-label={name}
+          className="w-12 h-8 rounded-md cursor-pointer bg-transparent border-0 p-0"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+        />
+      )}
+    />
+  );
+}
+
 export function AppearanceSettings() {
   const electron = useElectron();
   const { inContext, inContextFailed, setInContext } = useLocaleConfig();
@@ -78,6 +115,10 @@ export function AppearanceSettings() {
         theme: config?.theme ?? defaultConfig.theme,
         textSize: config?.textSize ?? defaultConfig.textSize,
         fonts: config?.fonts.join(',') ?? defaultConfig.fonts.join(','),
+        customAccent: config?.customAccent ?? defaultConfig.customAccent,
+        customBackground:
+          config?.customBackground ?? defaultConfig.customBackground,
+        avatarColor: config?.avatarColor ?? defaultConfig.avatarColor,
       },
     });
 
@@ -123,6 +164,9 @@ export function AppearanceSettings() {
 
   const onSubmit = (values: AppearanceSettingsForm) => {
     setConfig({
+      customAccent: values.customAccent,
+      customBackground: values.customBackground,
+      avatarColor: values.avatarColor,
       theme: values.theme,
       fonts: values.fonts.split(','),
       textSize: values.textSize,
@@ -181,8 +225,37 @@ export function AppearanceSettings() {
                       colors={colors}
                     />
                   ))}
+                  {/* VitalVR: the player's own colours */}
+                  <ThemeSelector
+                    control={control}
+                    name="theme"
+                    value="custom"
+                    colors={undefined}
+                    title={l10n.getString(
+                      'settings-interface-appearance-custom_colors'
+                    )}
+                    style={{
+                      WebkitTextFillColor: 'transparent',
+                      background: `linear-gradient(135deg, ${watch('customAccent')} 0%, ${watch('customAccent')} 50%, ${watch('customBackground')} 50% 100%)`,
+                    }}
+                  />
                 </div>
               }
+            />
+            {watch('theme') === 'custom' && (
+              <SettingRow
+                setting={groups.main.rows.customColors}
+                control={
+                  <div className="flex gap-3 items-center">
+                    <ColorInput control={control} name="customAccent" />
+                    <ColorInput control={control} name="customBackground" />
+                  </div>
+                }
+              />
+            )}
+            <SettingRow
+              setting={groups.main.rows.avatarColor}
+              control={<ColorInput control={control} name="avatarColor" />}
             />
           </SettingsGroup>
 

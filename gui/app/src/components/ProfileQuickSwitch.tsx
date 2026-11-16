@@ -9,6 +9,7 @@ import { TuneIcon } from './commons/icon/TuneIcon';
 import { PopoverMenu, PopoverMenuItem } from './commons/PopoverMenu';
 import { Tooltip } from './commons/Tooltip';
 import { Typography } from './commons/Typography';
+import { useAutoModes } from '@/v21/auto-modes';
 import { useBreakpoint } from '@/hooks/breakpoint';
 import {
   ProfileNames,
@@ -125,6 +126,8 @@ export function ProfileQuickSwitch() {
   const { l10n } = useLocalization();
   const { isMobile } = useBreakpoint('mobile');
   const profiles = useProfiles();
+  // VitalVR: shows that the automatic modes pick the profile
+  const auto = useAutoModes();
 
   if (!profiles) return null;
 
@@ -151,6 +154,18 @@ export function ProfileQuickSwitch() {
             )}
           >
             <TuneIcon size={14} />
+            {auto.settings.enabled && (
+              <span
+                className={classNames(
+                  'px-1.5 rounded text-[10px] font-bold leading-4 shrink-0',
+                  Date.now() < auto.pausedUntil
+                    ? 'bg-background-40 text-background-20'
+                    : 'bg-accent-background-30 text-background-10'
+                )}
+              >
+                AUTO
+              </span>
+            )}
             {!isMobile && (
               <>
                 <span className="min-w-0 max-w-[140px] truncate">

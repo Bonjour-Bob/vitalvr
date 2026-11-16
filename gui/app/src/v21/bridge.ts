@@ -11,6 +11,7 @@ import { bodyPartToNew, bodyPartToOld, trackerIdToNew, trackerIdToOld } from './
 import { feedConfigToOld, feedUpdateToNew, make, plain } from './feed';
 import * as S from './settings';
 import * as P from './profiles';
+import { ActivityDetector, autoModes } from './auto-modes';
 
 type Packable = { pack(builder: Builder): number };
 type Table<T> = new () => { __init(i: number, bb: ByteBuffer): { unpack(): T } };
@@ -123,6 +124,7 @@ export class V21Bridge {
   private poseRecording: ReturnType<typeof setInterval> | null = null;
   private driverConnected: boolean | null = null;
   private profiles = new P.ProfileStore();
+  private detector = new ActivityDetector();
 
   constructor(
     private readonly send: (bundle: O.MessageBundleT) => void,
@@ -483,6 +485,9 @@ export class V21Bridge {
       this.reply(N.RpcMessage.ProfilesResponse, this.profiles.response()),
     SwitchProfileRequest: (r: N.SwitchProfileRequestT) => {
       const name = r.name?.toString() ?? '';
+      // Picked by hand: the automatic modes leave it alone for a while
+      if (r.kind === N.ProfileKind.SETTINGS && autoModes.get().settings.enabled)
+        autoModes.pauseForManualChoice();
       this.rememberProfile(r.kind);
       const status = this.profiles.switchTo(r.kind, name);
       if (status === N.ProfileOperationStatus.OK) this.applyProfile(r.kind);
@@ -566,7 +571,10 @@ export class V21Bridge {
           this.emitDriverStatus();
         }
       }
-      this.emit('feed', N.DataFeedMessage.DataFeedUpdate, feedUpdateToNew(update));
+      const converted = feedUpdateToNew(update);
+      // The bones feed (index 1) drives the automatic modes
+      if (update.index === 1) this.autoMode(converted.bones);
+      this.emit('feed', N.DataFeedMessage.DataFeedUpdate, converted);
     }
     for (const header of bundle.rpcMsgs) {
       const name = O.RpcMessage[header.messageType];
@@ -653,6 +661,26 @@ export class V21Bridge {
         }),
       });
     this.rpc(O.RpcMessage.SkeletonConfigRequest, new O.SkeletonConfigRequestT());
+  }
+
+  // Keeps the settings profile on the one chosen for what the player does
+  private autoMode(bones: N.BoneT[]) {
+    const standing = this.settings?.modelSettings?.skeletonHeight?.hmdHeight ?? 0;
+    this.detector.update(bones, standing);
+    const { settings, activity, pausedUntil } = autoModes.get();
+    if (!settings.enabled || Date.now() < pausedUntil) return;
+    const name = settings.profiles[activity];
+    const kind = N.ProfileKind.SETTINGS;
+    if (
+      !name ||
+      name === this.profiles.activeName(kind) ||
+      !this.profiles.get(kind, name)
+    )
+      return;
+    this.rememberProfile(kind);
+    this.profiles.switchTo(kind, name);
+    this.applyProfile(kind);
+    this.reply(N.RpcMessage.ProfilesResponse, this.profiles.response());
   }
 
   private profileDone(status: N.ProfileOperationStatus) {
