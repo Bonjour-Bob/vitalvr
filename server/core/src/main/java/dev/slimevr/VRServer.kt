@@ -54,7 +54,8 @@ typealias BridgeProvider = (
 	computedTrackers: List<Tracker>,
 ) -> Sequence<Bridge>
 
-const val SLIMEVR_IDENTIFIER = "dev.slimevr.SlimeVR"
+// VitalVR: its own settings and logs folder, apart from SlimeVR
+const val SLIMEVR_IDENTIFIER = "dev.vitalvr.VitalVR"
 
 class VRServer @JvmOverloads constructor(
 	bridgeProvider: BridgeProvider = { _, _ -> sequence {} },

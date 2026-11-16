@@ -422,7 +422,7 @@ function createWindow() {
     getPlatform() === 'macos' ? appleTrayIcon : trayIcon
   );
   const tray = new Tray(icon);
-  tray.setToolTip('SlimeVR');
+  tray.setToolTip('VitalVR');
   tray.on('click', () => {
     mainWindow?.show();
   });
@@ -487,8 +487,8 @@ const checkEnvironmentVariables = () => {
   const set = disallowedVars.filter((env) => !!process.env[env]);
   if (set.length > 0) {
     dialog.showErrorBox(
-      'SlimeVR',
-      `You have environment variables ${set.join(', ')} set, which may cause the SlimeVR Server to fail to launch properly.`
+      'VitalVR',
+      `You have environment variables ${set.join(', ')} set, which may cause the VitalVR server to fail to launch properly.`
     );
     app.quit();
   }
@@ -517,8 +517,8 @@ const spawnServer = async () => {
   if (!javaBin) {
     captureJavaNotFound();
     dialog.showErrorBox(
-      'SlimeVR',
-      'Unable to find a compatible Java version, Make sure to use the latest SlimeVR installer. Or install java 25 or higher'
+      'VitalVR',
+      'Unable to find a compatible Java version, Reinstall VitalVR, or install Java 17 or higher'
     );
     app.quit();
     return;
@@ -608,7 +608,7 @@ app.whenReady().then(async () => {
   } catch (err) {
     logger.error(err, 'Failed to initialize stores');
     dialog.showErrorBox(
-      'SlimeVR',
+      'VitalVR',
       'Failed to initialize application storage. Please make sure the application has write permissions to its data folder.'
     );
     app.quit();
@@ -633,7 +633,7 @@ app.whenReady().then(async () => {
 
   createWindow();
 
-  logger.info('SlimeVR started!');
+  logger.info('VitalVR started!');
 
   app.on('window-all-closed', () => {
     app.quit();

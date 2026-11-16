@@ -135,6 +135,7 @@ export function AppearanceSettings() {
   }, [onSubmit]);
 
   const themes = [
+    { value: 'vitalvr', colors: '!bg-vitalvr' },
     { value: 'slime', colors: '!bg-slime' },
     { value: 'space', colors: '!bg-space' },
     { value: 'oled', colors: '!bg-oled' },

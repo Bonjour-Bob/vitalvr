@@ -8,7 +8,8 @@ import { existsSync } from 'node:fs';
 import { options } from './cli';
 
 const javaBin = getPlatform() === 'windows' ? 'java.exe' : 'java';
-export const CONFIG_IDENTIFIER = 'dev.slimevr.SlimeVR';
+// VitalVR: its own settings and logs folder, apart from SlimeVR
+export const CONFIG_IDENTIFIER = 'dev.vitalvr.VitalVR';
 
 export const getGuiDataFolder = () => {
   const platform = getPlatform();
@@ -104,7 +105,8 @@ export const findSystemJRE = async (sharedDir: string) => {
         resolve(version);
       });
     });
-    if (version && version >= 25) return path;
+    // VitalVR: the v21 server runs on Java 17
+    if (version && version >= 17) return path;
   }
   return null;
 };

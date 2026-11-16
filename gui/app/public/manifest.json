@@ -1,10 +1,10 @@
 {
-  "name": "SlimeVR GUI",
-  "short_name": "SlimeVR GUI",
-  "description": "A web interface for controlling the SlimeVR Server software",
+  "name": "VitalVR",
+  "short_name": "VitalVR",
+  "description": "VitalVR",
   "display": "standalone",
-  "theme_color": "#663499",
-  "background_color": "#663499",
+  "theme_color": "#061015",
+  "background_color": "#061015",
   "icons": [
     {
       "src": "logo.svg",

@@ -143,7 +143,7 @@ export const defaultConfig: Config = {
   feedbackSound: true,
   feedbackSoundVolume: 0.5,
   connectedTrackersWarning: true,
-  theme: 'slime',
+  theme: 'vitalvr',
   textSize: 12,
   fonts: ['poppins'],
   useTray: null,

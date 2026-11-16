@@ -319,6 +319,7 @@ const config = {
       },
       backgroundImage: {
         slime: `linear-gradient(135deg, ${colors.purple[200]} 50%, ${colors['blue-gray'][700]} 50% 100%)`,
+        vitalvr: 'linear-gradient(135deg, #2EE6A8 0%, #25B9F5 50%, #0A1317 50% 100%)',
         space: `linear-gradient(135deg, ${colors.purple[200]} 50%, ${colors['dark-background'][700]} 50% 100%)`,
         oled: `linear-gradient(135deg, ${colors.purple[200]} 50%, ${colors['dark-background'][900]} 50% 100%)`,
         light: `linear-gradient(135deg, ${colors.purple[100]} 50%, ${colors['light-background'][700]} 50% 100%)`,

@@ -10,13 +10,14 @@ import { useWebsocketAPI } from '@/hooks/websocket-api';
 import { CloseIcon } from './commons/icon/CloseIcon';
 import { MaximiseIcon } from './commons/icon/MaximiseIcon';
 import { MinimiseIcon } from './commons/icon/MinimiseIcon';
-import { SlimeVRIcon } from './commons/icon/SimevrIcon';
 import { ProgressBar } from './commons/ProgressBar';
 import { Tooltip } from './commons/Tooltip';
 import { Typography } from './commons/Typography';
 import { DownloadIcon } from './commons/icon/DownloadIcon';
 import { DOCS_SITE, GH_REPO, VersionContext } from '@/App';
 import classNames from 'classnames';
+import { VitalVRLogo } from './commons/icon/VitalVRLogo';
+import { VITALVR_VERSION } from '@/vitalvr-version';
 import { QuestionIcon } from './commons/icon/QuestionIcon';
 import { IconButton } from './commons/IconButton';
 import { useBreakpoint } from '@/hooks/breakpoint';
@@ -68,7 +69,7 @@ export function VersionTag() {
           openUrl(url);
         }}
       >
-        {(__VERSION_TAG__ || __COMMIT_HASH__) + (__GIT_CLEAN__ ? '' : '-dirty')}
+        v{VITALVR_VERSION}
       </a>
     </Tooltip>
   );
@@ -158,7 +159,7 @@ export function TopBar({
                       setConfig({ doneOnboarding: true });
                   }}
                 >
-                  <SlimeVRIcon />
+                  <VitalVRLogo size={26} />
                 </NavLink>
               )}
               {!isMobile && (
@@ -166,7 +167,7 @@ export function TopBar({
                   className={classNames('flex justify-around flex-col')}
                   data-electron-drag-region
                 >
-                  <Typography>SlimeVR</Typography>
+                  <Typography bold>VitalVR</Typography>
                 </div>
               )}
               {(!doesMatchSettings || !isMobile) && <VersionTag />}

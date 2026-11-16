@@ -72,7 +72,7 @@ import {
 import { useProvideErrorReporting } from './hooks/error-reporting';
 import { useProvideProfiles } from './hooks/profiles';
 
-export const GH_REPO = 'SlimeVR/SlimeVR-Server';
+export const GH_REPO = 'Bonjour-Bob/VitalVR';
 export const VersionContext = createContext('');
 export const DOCS_SITE = 'https://docs.slimevr.dev';
 export const SLIMEVR_DISCORD = 'https://discord.gg/slimevr';

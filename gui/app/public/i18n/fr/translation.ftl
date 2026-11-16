@@ -603,7 +603,7 @@ install-info_udev-rules_modal_button = Fermer
 
 ## Setup start
 
-onboarding-home = Bienvenue sur SlimeVR
+onboarding-home = Bienvenue sur VitalVR
 onboarding-home-start = Commencer
 
 ## Tracker connection setup
@@ -984,13 +984,13 @@ error_collection_modal-cancel = Je ne veux pas
 tracking_checklist = Checklist de suivi
 tracking_checklist-settings = Paramètres de lachecklist de suivi
 tracking_checklist-settings-close = Fermer
-tracking_checklist-status-incomplete = Vous n’êtes pas prêt à utiliser SlimeVR !
+tracking_checklist-status-incomplete = Vous n’êtes pas prêt à utiliser VitalVR !
 tracking_checklist-status-partial =
     { $count ->
         [one] Vous avez 1 avertissement !
        *[other] Vous avez { $count } avertissements !
     }
-tracking_checklist-status-complete = Vous êtes prêt à utiliser SlimeVR !
+tracking_checklist-status-complete = Vous êtes prêt à utiliser VitalVR !
 tracking_checklist-MOUNTING_CALIBRATION = Effectuer une calibration de l'alignement
 tracking_checklist-FEET_MOUNTING_CALIBRATION = Effectuer une calibration de l'alignement des pieds
 tracking_checklist-FULL_RESET = Faire une réinitialisation complète
