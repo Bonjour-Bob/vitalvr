@@ -91,14 +91,17 @@ const SKELETON_BONE_PAIRS: [O.SkeletonBone, N.SkeletonBone][] = [
   [O.SkeletonBone.HAND_Y, N.SkeletonBone.HAND],
 ];
 
-function skeletonPartsToNew(parts: O.SkeletonPartT[]): N.SkeletonPartT[] {
+function skeletonPartsToNew(
+  parts: O.SkeletonPartT[],
+  waist?: [number, number]
+): N.SkeletonPartT[] {
   const part = (bone: N.SkeletonBone, value: number) =>
     make(N.SkeletonPartT, { bone, value, minValue: -1, maxValue: 2 });
   const out: N.SkeletonPartT[] = [];
   for (const p of parts) {
     if (p.bone === O.SkeletonBone.WAIST) {
-      out.push(part(N.SkeletonBone.UPPER_WAIST, p.value / 2));
-      out.push(part(N.SkeletonBone.LOWER_WAIST, p.value / 2));
+      out.push(part(N.SkeletonBone.UPPER_WAIST, waist?.[0] ?? p.value / 2));
+      out.push(part(N.SkeletonBone.LOWER_WAIST, waist?.[1] ?? p.value / 2));
       continue;
     }
     const pair = SKELETON_BONE_PAIRS.find(([old]) => old === p.bone);
@@ -114,6 +117,7 @@ export type BridgeEmit = (kind: 'rpc' | 'feed', type: number, data: unknown) => 
 export class V21Bridge {
   private settings: O.SettingsResponseT | null = null;
   private skeletonParts: O.SkeletonPartT[] = [];
+  private waistHalves: [number, number] = [0, 0];
   private lastFeed: O.DataFeedUpdateT | null = null;
   private unknownDevices = new Map<string, N.UnknownDeviceT>();
   private poseRecording: ReturnType<typeof setInterval> | null = null;
@@ -315,10 +319,11 @@ export class V21Bridge {
         r.bone === N.SkeletonBone.UPPER_WAIST ||
         r.bone === N.SkeletonBone.LOWER_WAIST
       ) {
-        // Both halves make the v21 waist
-        const waist = this.skeletonParts.find((p) => p.bone === O.SkeletonBone.WAIST);
+        // Both halves make the v21 waist; kept here so two changes in a row
+        // (grouped proportions) add up before the server answers
+        this.waistHalves[r.bone === N.SkeletonBone.UPPER_WAIST ? 0 : 1] = r.value;
         bone = O.SkeletonBone.WAIST;
-        value = (waist?.value ?? 0) / 2 + r.value;
+        value = this.waistHalves[0] + this.waistHalves[1];
       } else {
         bone = SKELETON_BONE_PAIRS.find(([, b]) => b === r.bone)?.[0];
       }
@@ -427,8 +432,9 @@ export class V21Bridge {
       const pose = stayAlignedPoseToOld(r.pose);
       if (pose === null) return;
       this.stopPoseRecording();
-      const duration = 3000;
+      const duration = 3; // seconds, like the v22 server
       const started = Date.now();
+      let shown = 0;
       const status = (
         lifecycle: N.StayAlignedPoseRecordingLifecycle,
         progress: number
@@ -445,9 +451,11 @@ export class V21Bridge {
         );
       status(N.StayAlignedPoseRecordingLifecycle.RUNNING, 0);
       this.poseRecording = setInterval(() => {
-        const progress = Math.min(Date.now() - started, duration);
+        const progress = Math.floor((Date.now() - started) / 1000);
         if (progress < duration) {
-          status(N.StayAlignedPoseRecordingLifecycle.RUNNING, progress);
+          if (progress !== shown)
+            status(N.StayAlignedPoseRecordingLifecycle.RUNNING, progress);
+          shown = progress;
           return;
         }
         this.stopPoseRecording();
@@ -457,7 +465,7 @@ export class V21Bridge {
         );
         this.rpc(O.RpcMessage.SettingsRequest, new O.SettingsRequestT());
         status(N.StayAlignedPoseRecordingLifecycle.DONE, duration);
-      }, 250);
+      }, 100);
     },
     CancelStayAlignedPoseRecordingRequest: () => {
       if (!this.poseRecording) return;
@@ -592,6 +600,12 @@ export class V21Bridge {
       [N.RpcMessage.HIDSettingsResponse, S.hidToNew(s)],
       [N.RpcMessage.TimeoutSettingsResponse, S.timeoutToNew(s)],
       [N.RpcMessage.BoneRoutingSettingsResponse, S.routingToNew(s)],
+      [
+        N.RpcMessage.StayAlignedStatusResponse,
+        make(N.StayAlignedStatusResponseT, {
+          enabled: s.stayAligned?.enabled ?? false,
+        }),
+      ],
     ];
     for (const [type, data] of out) this.reply(type, data);
   }
@@ -712,11 +726,15 @@ export class V21Bridge {
       ),
     SkeletonConfigResponse: (r: O.SkeletonConfigResponseT) => {
       this.skeletonParts = r.skeletonParts;
+      const waist =
+        r.skeletonParts.find((p) => p.bone === O.SkeletonBone.WAIST)?.value ?? 0;
+      if (Math.abs(this.waistHalves[0] + this.waistHalves[1] - waist) > 1e-4)
+        this.waistHalves = [waist / 2, waist / 2];
       this.emit(
         'rpc',
         N.RpcMessage.SkeletonProportionsResponse,
         make(N.SkeletonProportionsResponseT, {
-          skeletonParts: skeletonPartsToNew(r.skeletonParts),
+          skeletonParts: skeletonPartsToNew(r.skeletonParts, this.waistHalves),
           skeletonHeight: r.userHeight,
         })
       );
