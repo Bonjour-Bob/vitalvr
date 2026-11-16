@@ -37,6 +37,10 @@ export function SettingSelectorMobile() {
       url: '/settings/profiles',
     },
     {
+      label: l10n.getString('settings-sidebar-auto_modes'),
+      url: '/settings/auto-modes',
+    },
+    {
       label: l10n.getString('settings-sidebar-appearance'),
       url: '/settings/appearance',
     },

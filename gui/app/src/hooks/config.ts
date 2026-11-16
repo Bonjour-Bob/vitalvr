@@ -127,6 +127,10 @@ export interface Config {
   dontShowUdevModal: boolean;
   collapsedConnectionGroups: Record<string, boolean>;
   controllerNav: boolean;
+  // VitalVR: colours of the custom theme and of the 3D avatar
+  customAccent: string;
+  customBackground: string;
+  avatarColor: string;
 }
 
 export interface ConfigContext {
@@ -144,6 +148,9 @@ export const defaultConfig: Config = {
   feedbackSoundVolume: 0.5,
   connectedTrackersWarning: true,
   theme: 'vitalvr',
+  customAccent: '#2ed6a0',
+  customBackground: '#18272d',
+  avatarColor: '#f2f2f8',
   textSize: 12,
   fonts: ['poppins'],
   useTray: null,

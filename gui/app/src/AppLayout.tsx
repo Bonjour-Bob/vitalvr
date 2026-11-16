@@ -1,5 +1,6 @@
 import { useLayoutEffect } from 'react';
-import { useConfig } from './hooks/config';
+import { defaultConfig, useConfig } from './hooks/config';
+import { applyCustomTheme } from './utils/custom-theme';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 
 export function AppLayout() {
@@ -11,6 +12,11 @@ export function AppLayout() {
     if (!config) return;
     if (config.theme !== undefined) {
       document.documentElement.dataset.theme = config.theme;
+      applyCustomTheme(
+        config.theme,
+        config.customAccent ?? defaultConfig.customAccent,
+        config.customBackground ?? defaultConfig.customBackground
+      );
     }
 
     if (config.fonts !== undefined) {

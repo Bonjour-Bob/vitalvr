@@ -31,6 +31,10 @@ import {
   ProfilesSettings,
 } from './pages/ProfilesSettings';
 import {
+  autoModesSettingsPage,
+  AutoModesSettings,
+} from './pages/AutoModesSettings';
+import {
   boneRoutingSettingsPage,
   BoneRoutingSettings,
 } from './pages/BoneRoutingSettings';
@@ -64,6 +68,7 @@ export const settingsPages: SettingsPageRoute[] = [
   { page: resetsSettingsPage, element: <ResetsSettings /> },
   { page: stayAlignedSettingsPage, element: <StayAlignedSettings /> },
   { page: profilesSettingsPage, element: <ProfilesSettings /> },
+  { page: autoModesSettingsPage, element: <AutoModesSettings /> },
   { page: appearanceSettingsPage, element: <AppearanceSettings /> },
   { page: behaviorSettingsPage, element: <BehaviorSettings /> },
   { page: homeSettingsPage, element: <HomeScreenSettings /> },

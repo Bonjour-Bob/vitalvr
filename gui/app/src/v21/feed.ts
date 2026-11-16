@@ -124,13 +124,30 @@ function trackerData(
   });
 }
 
+// v21 turns a bone so that -Y points along it, like v22's orientation. Only the
+// head differs: v21 gives it a length backwards (+Z, head shift), v22 none, so
+// its v21 rotation is pitched 90 degrees: undo that (rotation * Rx(90)).
+function headOrientation(q: O.QuatT | null): O.QuatT | null {
+  if (!q) return q;
+  const s = Math.SQRT1_2;
+  return make(O.QuatT, {
+    x: s * (q.x + q.w),
+    y: s * (q.y + q.z),
+    z: s * (q.z - q.y),
+    w: s * (q.w - q.x),
+  });
+}
+
 function bone(b: O.BoneT): N.BoneT {
+  const bodyPart = bodyPartToNew(b.bodyPart);
+  const orientation = plain<N.QuatT>(
+    bodyPart === N.BodyPart.HEAD ? headOrientation(b.rotationG) : b.rotationG
+  );
   return make(N.BoneT, {
-    bodyPart: bodyPartToNew(b.bodyPart),
+    bodyPart,
     boneLength: b.boneLength,
-    // v21 sends the rotation in world space, which v22 calls orientation
-    rotation: plain(b.rotationG),
-    orientation: plain(b.rotationG),
+    rotation: orientation,
+    orientation,
     headPosition: plain(b.headPositionG),
   });
 }
@@ -164,8 +181,13 @@ export function feedUpdateToNew(update: O.DataFeedUpdateT): N.DataFeedUpdateT {
     }),
     bones: update.bones
       .map(bone)
-      // Hip width bones have no v22 body part
-      .filter((b) => b.bodyPart !== N.BodyPart.NONE),
+      // Hip width and tracker bones have no v22 body part, and the foot
+      // tracker bones come after the feet with the same body part: keep the feet
+      .filter(
+        (b, i, all) =>
+          b.bodyPart !== N.BodyPart.NONE &&
+          all.findIndex((o) => o.bodyPart === b.bodyPart) === i
+      ),
     index: update.index,
     serverGuards: serverGuards(update.serverGuards),
     dongles: [],

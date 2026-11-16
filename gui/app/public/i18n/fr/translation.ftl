@@ -1027,3 +1027,39 @@ toolbar-mounting_calibration-fingers = Doigts
 toolbar-drift_reset = Réinitialisation de la dérive
 toolbar-assigned_trackers = { $count } capteurs assignés
 toolbar-unassigned_trackers = { $count } capteurs non assignés
+
+## VitalVR: modes automatiques
+settings-sidebar-auto_modes = Modes automatiques
+settings-auto_modes = Modes automatiques
+settings-auto_modes-main = Changer de profil tout seul
+settings-auto_modes-main-description = VitalVR regarde ton corps (hauteur de la tête, bassin couché ou debout, vitesse des mouvements) et passe sur le bon profil quand tu danses, fais du lap dance, te couches ou reviens à la normale.
+settings-auto_modes-enabled = Modes automatiques
+settings-auto_modes-enabled-description = Quand tu choisis un profil à la main, les modes automatiques attendent un peu avant de reprendre la main.
+settings-auto_modes-status = Vu maintenant : { $seen } · Profil suivi : { $activity }
+settings-auto_modes-measures = Mouvement : { $motion }°/s · Hauteur de la tête : { $height } % de debout
+settings-auto_modes-paused = En pause encore { $minutes } min (profil choisi à la main)
+settings-auto_modes-resume = Reprendre maintenant
+settings-auto_modes-profiles = Profil pour chaque activité
+settings-auto_modes-profiles-description = Choisis le profil utilisé dans chaque cas. Tu peux mettre tes propres profils (créés dans Profils).
+settings-auto_modes-activity-normal = Normal (debout, assis, marcher)
+settings-auto_modes-activity-dance = Danse (debout, beaucoup de mouvement)
+settings-auto_modes-activity-lapdance = Lap dance (au sol, à genoux, assis en bougeant)
+settings-auto_modes-activity-bed = Couché au calme (lit, chill)
+settings-auto_modes-no_switch = Ne pas changer
+settings-auto_modes-tuning = Réglages fins
+settings-auto_modes-sensitivity = Sensibilité aux mouvements
+settings-auto_modes-sensitivity-description = Plus haut : de petits mouvements suffisent pour passer en danse ou lap dance. Plus bas : il faut bouger plus fort.
+settings-auto_modes-delay = Temps avant de changer
+settings-auto_modes-delay-description = Multiplie les temps d'attente (environ 4 s pour entrer en danse, 12 à 20 s pour revenir en normal).
+settings-auto_modes-manual_pause = Pause après un choix à la main
+settings-auto_modes-manual_pause-description = Pendant ce temps, ton choix de profil n'est pas changé. 0 = jamais de pause.
+settings-auto_modes-defaults = Remettre les réglages d'origine
+
+## VitalVR: couleurs
+settings-interface-appearance-custom_colors = Mes couleurs
+settings-interface-appearance-custom_colors-description = Couleur principale (boutons, éléments actifs) et couleur du fond du thème personnalisé.
+settings-interface-appearance-avatar_color = Couleur de l'avatar
+settings-interface-appearance-avatar_color-description = Couleur du bonhomme 3D de l'aperçu.
+settings-interface-appearance-text_group = Texte
+settings-interface-appearance-language_group = Langue
+settings-general-interface-theme-description = Les couleurs utilisées dans toute l'interface.

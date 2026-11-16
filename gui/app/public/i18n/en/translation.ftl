@@ -1899,3 +1899,36 @@ toolbar-unassigned_trackers = { $count ->
     [one] { $count } tracker unassigned
     *[other] { $count } trackers unassigned
 }
+
+## VitalVR: automatic modes
+settings-sidebar-auto_modes = Automatic modes
+settings-auto_modes = Automatic modes
+settings-auto_modes-main = Switch profiles by itself
+settings-auto_modes-main-description = VitalVR watches your body (head height, hips lying or upright, how fast you move) and switches to the right profile when you dance, do lap dance, lie down or go back to normal.
+settings-auto_modes-enabled = Automatic modes
+settings-auto_modes-enabled-description = When you pick a profile by hand, the automatic modes wait a while before taking over again.
+settings-auto_modes-status = Seen now: { $seen } · Profile followed: { $activity }
+settings-auto_modes-measures = Motion: { $motion }°/s · Head height: { $height } % of standing
+settings-auto_modes-paused = Paused for { $minutes } more min (profile picked by hand)
+settings-auto_modes-resume = Resume now
+settings-auto_modes-profiles = Profile for each activity
+settings-auto_modes-profiles-description = Pick the profile used in each case. Your own profiles (made in Profiles) work too.
+settings-auto_modes-activity-normal = Normal (standing, sitting, walking)
+settings-auto_modes-activity-dance = Dance (standing, lots of movement)
+settings-auto_modes-activity-lapdance = Lap dance (floor, kneeling, sitting while moving)
+settings-auto_modes-activity-bed = Lying down calmly (bed, chill)
+settings-auto_modes-no_switch = Don't switch
+settings-auto_modes-tuning = Fine tuning
+settings-auto_modes-sensitivity = Motion sensitivity
+settings-auto_modes-sensitivity-description = Higher: small moves are enough for dance or lap dance. Lower: you need to move more.
+settings-auto_modes-delay = Time before switching
+settings-auto_modes-delay-description = Multiplies the waiting times (about 4 s to go into dance, 12 to 20 s to go back to normal).
+settings-auto_modes-manual_pause = Pause after a manual pick
+settings-auto_modes-manual_pause-description = During this time your profile choice is not changed. 0 = never pause.
+settings-auto_modes-defaults = Back to defaults
+
+## VitalVR: colours
+settings-interface-appearance-custom_colors = My colours
+settings-interface-appearance-custom_colors-description = Main colour (buttons, active items) and background colour of the custom theme.
+settings-interface-appearance-avatar_color = Avatar colour
+settings-interface-appearance-avatar_color-description = Colour of the 3D figure in the preview.
