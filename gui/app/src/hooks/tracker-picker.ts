@@ -231,7 +231,8 @@ export const PICKER_TABS: Record<PickerTab, PickerTabSpec> = {
   },
 };
 
-export const PICKER_TAB_ORDER: PickerTab[] = ['body', 'fingers', 'toes'];
+// VitalVR: the v21 server has no toe body parts
+export const PICKER_TAB_ORDER: PickerTab[] = ['body', 'fingers'];
 
 export function getPickerSelection(bodyPart?: BodyPart): {
   tab: PickerTab;

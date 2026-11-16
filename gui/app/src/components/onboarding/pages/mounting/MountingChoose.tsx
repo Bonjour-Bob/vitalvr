@@ -8,12 +8,8 @@ import { Button } from '@/components/commons/Button';
 import { track } from '@/utils/sentry';
 import { MountingMethod } from 'solarxr-protocol';
 import { useResetsSettings } from '@/hooks/resets-settings';
-import {
-  MANUAL_MOUNTING_PATH,
-  STEP_MOUNTING_PATH,
-} from '@/hooks/mounting-method';
+import { MANUAL_MOUNTING_PATH } from '@/hooks/mounting-method';
 import { SkiIcon } from '@/components/commons/icon/SkiIcon';
-import { StepIcon } from '@/components/commons/icon/StepIcon';
 import { TuneIcon } from '@/components/commons/icon/TuneIcon';
 
 function MethodCard({
@@ -104,22 +100,16 @@ export function MountingChoose() {
               {l10n.getString('onboarding-choose_mounting-description')}
             </Typography>
           </div>
-          <div className="grid xs:grid-cols-3 w-full xs:flex-row mobile:flex-col gap-4 [&>div]:grow">
-            <MethodCard
-              alonePage={state.alonePage}
-              method={MountingMethod.STEP}
-              name="step"
-              to={STEP_MOUNTING_PATH}
-              icon={<StepIcon size={32} />}
-              recommended
-              variant="primary"
-            />
+          <div className="grid xs:grid-cols-2 w-full xs:flex-row mobile:flex-col gap-4 [&>div]:grow">
+            {/* VitalVR: no step mounting on the v21 server */}
             <MethodCard
               alonePage={state.alonePage}
               method={MountingMethod.POSE}
               name="pose"
               to="/onboarding/mounting/auto"
               icon={<SkiIcon size={32} />}
+              recommended
+              variant="primary"
             />
             <MethodCard
               alonePage={state.alonePage}

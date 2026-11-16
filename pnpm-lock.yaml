@@ -222,7 +222,7 @@ importers:
         version: 7.7.4
       solarxr-protocol:
         specifier: workspace:*
-        version: link:../../solarxr-protocol
+        version: link:../solarxr-protocol
       tailwind-gradient-mask-image:
         specifier: ^1.2.0
         version: 1.2.0
@@ -413,7 +413,7 @@ importers:
         version: 3.8.3
       solarxr-protocol:
         specifier: workspace:*
-        version: link:../../solarxr-protocol
+        version: link:../solarxr-protocol
       typescript:
         specifier: ^5.6.3
         version: 5.9.3
@@ -422,7 +422,7 @@ importers:
     dependencies:
       solarxr-protocol:
         specifier: workspace:*
-        version: link:../../solarxr-protocol
+        version: link:../solarxr-protocol
     devDependencies:
       electron:
         specifier: ^44.0.0
@@ -431,7 +431,7 @@ importers:
         specifier: ^5.6.3
         version: 5.9.3
 
-  solarxr-protocol:
+  gui/solarxr-protocol:
     dependencies:
       flatbuffers:
         specifier: ^22.10.26

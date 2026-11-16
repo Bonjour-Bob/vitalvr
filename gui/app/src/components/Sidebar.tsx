@@ -13,7 +13,6 @@ import { Typography } from './commons/Typography';
 import { useLocaleConfig } from '@/i18n/config';
 import { useWebsocketAPI } from '@/hooks/websocket-api';
 import {
-  RecenterMocapModeRequestT,
   RpcMessage,
   SkeletonProportionsRequestT,
   SkeletonProportionsResponseT,
@@ -26,7 +25,6 @@ import { useConfig } from '@/hooks/config';
 import { useBHV } from '@/hooks/bvh';
 import { usePauseTracking } from '@/hooks/pause-tracking';
 import { PlayIcon } from './commons/icon/PlayIcon';
-import { RecenterIcon } from './commons/icon/RecenterIcon';
 
 export function PreviewControls({ open }: { open: boolean }) {
   const [userHeight, setUserHeight] = useState('');
@@ -137,27 +135,6 @@ export function PreviewControls({ open }: { open: boolean }) {
             >
               {!paused && <PauseIcon width={25} />}
               {paused && <PlayIcon width={25} />}
-            </Clickable>
-          </Tooltip>
-
-          <Tooltip
-            content={
-              <Typography variant="section-title" id="preview-recenter_mocap" />
-            }
-            preferedDirection="top"
-          >
-            <Clickable
-              className={classNames(
-                'flex justify-center items-center w-10 h-10 rounded-full hover:bg-background-60 cursor-pointer'
-              )}
-              onClick={() =>
-                sendRPCPacket(
-                  RpcMessage.RecenterMocapModeRequest,
-                  new RecenterMocapModeRequestT()
-                )
-              }
-            >
-              <RecenterIcon width={24} />
             </Clickable>
           </Tooltip>
         </div>

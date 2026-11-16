@@ -40,13 +40,6 @@ export function MountingMethodRadio({ col = false }: { col?: boolean }) {
       <Radio
         control={control}
         name="mountingMethod"
-        label={l10n.getString('mounting_method-step')}
-        description={l10n.getString('mounting_method-step-description')}
-        value={MountingMethod.STEP}
-      />
-      <Radio
-        control={control}
-        name="mountingMethod"
         label={l10n.getString('mounting_method-pose')}
         description={l10n.getString('mounting_method-pose-description')}
         value={MountingMethod.POSE}

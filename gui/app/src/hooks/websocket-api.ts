@@ -11,11 +11,11 @@ import {
 import {
   DataFeedMessage,
   DataFeedMessageHeaderT,
-  MessageBundle,
-  MessageBundleT,
   RpcMessage,
   RpcMessageHeaderT,
 } from 'solarxr-protocol';
+import * as V21 from '@/v21-protocol/all_generated';
+import { V21Bridge } from '@/v21/bridge';
 
 import { Builder, ByteBuffer } from 'flatbuffers';
 import { useInterval, useTimeout } from './timeout';
@@ -49,6 +49,24 @@ export function useProvideWebsocketApi(): WebSocketApi {
   const [timedOut, setTimedOut] = useState(false);
   const [isConnected, setConnected] = useState(false);
 
+  // VitalVR: the server speaks the v21 protocol, the interface the v22 one
+  const bridgeRef = useRef<V21Bridge | null>(null);
+  if (!bridgeRef.current) {
+    bridgeRef.current = new V21Bridge(
+      (bundle) => {
+        if (webSocketRef.current?.readyState !== WebSocket.OPEN) return;
+        const fbb = new Builder(1);
+        fbb.finish(bundle.pack(fbb));
+        webSocketRef.current.send(fbb.asUint8Array());
+      },
+      (kind, type, data) => {
+        const target = kind === 'rpc' ? rpclistenerRef : datafeedlistenerRef;
+        const name = kind === 'rpc' ? RpcMessage[type] : DataFeedMessage[type];
+        target.current?.dispatchEvent(new CustomEvent(name, { detail: data }));
+      }
+    );
+  }
+
   const urlParams = new URLSearchParams(window.location.search);
   const targetIp = urlParams.get('ip') ?? 'localhost';
   const targetPort = urlParams.get('port') ?? '21110';
@@ -63,6 +81,7 @@ export function useProvideWebsocketApi(): WebSocketApi {
   const onConnected = () => {
     if (!webSocketRef.current) return;
     Sentry.addBreadcrumb({ category: 'websocket', message: 'Connected to the server' });
+    bridgeRef.current?.onConnected();
     setFirstConnection(false);
     setTimedOut(false);
     setConnected(true);
@@ -84,39 +103,13 @@ export function useProvideWebsocketApi(): WebSocketApi {
 
     const fbb = new ByteBuffer(new Uint8Array(buffer));
 
-    const message = MessageBundle.getRootAsMessageBundle(fbb).unpack();
-
-    message.rpcMsgs.forEach((rpcHeader) => {
-      rpclistenerRef.current?.dispatchEvent(
-        new CustomEvent(RpcMessage[rpcHeader.messageType], {
-          detail: rpcHeader.message,
-        })
-      );
-    });
-
-    message.dataFeedMsgs.forEach((datafeedHeader) => {
-      datafeedlistenerRef.current?.dispatchEvent(
-        new CustomEvent(DataFeedMessage[datafeedHeader.messageType], {
-          detail: datafeedHeader.message,
-        })
-      );
-    });
+    const message = V21.MessageBundle.getRootAsMessageBundle(fbb).unpack();
+    bridgeRef.current?.incoming(message);
   };
 
   const sendRPCPacket = (type: RpcMessage, data: RPCPacketType): void => {
     if (webSocketRef?.current?.readyState !== WebSocket.OPEN) return;
-    const fbb = new Builder(1);
-
-    const message = new MessageBundleT();
-
-    const rpcHeader = new RpcMessageHeaderT();
-    rpcHeader.messageType = type;
-    rpcHeader.message = data;
-
-    message.rpcMsgs = [rpcHeader];
-    fbb.finish(message.pack(fbb));
-
-    webSocketRef.current.send(fbb.asUint8Array());
+    bridgeRef.current?.outgoingRpc(type, data);
     Sentry.addBreadcrumb({ category: 'rpc', message: RpcMessage[type] });
 
     rpcPacketCounterRef.current++;
@@ -127,18 +120,7 @@ export function useProvideWebsocketApi(): WebSocketApi {
     data: DataFeedPacketType
   ): void => {
     if (webSocketRef?.current?.readyState !== WebSocket.OPEN) return;
-    const fbb = new Builder(1);
-
-    const message = new MessageBundleT();
-
-    const datafeedHeader = new DataFeedMessageHeaderT();
-    datafeedHeader.messageType = type;
-    datafeedHeader.message = data;
-
-    message.dataFeedMsgs = [datafeedHeader];
-    fbb.finish(message.pack(fbb));
-
-    webSocketRef.current.send(fbb.asUint8Array());
+    bridgeRef.current?.outgoingFeed(type, data);
   };
 
   const connect = () => {
